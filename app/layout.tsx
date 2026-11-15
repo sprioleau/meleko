@@ -3,6 +3,8 @@ import "@fontsource-variable/nunito-sans";
 import "@fontsource-variable/geist";
 import "./globals.css";
 import { Shell } from "@/components/shell";
+import { ProgressProvider } from "@/components/progress-provider";
+import { nextAuth } from "@/lib/server-auth";
 
 const description = "Learn Scripture through play. Remember it for life.";
 
@@ -24,9 +26,11 @@ export const viewport: Viewport = {
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  const AuthProvider = nextAuth?.ConvexAuthNextjsServerProvider;
+  const content = <Shell>{children}</Shell>;
   return (
     <html lang="en">
-      <body><Shell>{children}</Shell></body>
+      <body>{AuthProvider ? <AuthProvider><ProgressProvider>{content}</ProgressProvider></AuthProvider> : content}</body>
     </html>
   );
 }

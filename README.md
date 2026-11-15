@@ -23,7 +23,7 @@ npm ci
 npm run dev
 ```
 
-Open [localhost:3000](http://localhost:3000). To enable backend persistence, run `CONVEX_AGENT_MODE=anonymous npm run convex:dev` in a separate terminal before starting Next.js. The Convex CLI writes the local deployment URL to `.env.local`. Practice is saved on the current browser and synced to Convex when configured. The first slice uses a browser-specific player key.
+Open [localhost:3000](http://localhost:3000). To enable backend persistence, run `CONVEX_AGENT_MODE=anonymous npm run convex:dev` in a separate terminal before starting Next.js. The Convex CLI writes the local deployment URL to `.env.local`. Guest practice is associated with the current browser. Passkey accounts sync saved verses and practice progress through Convex.
 
 ```sh
 npm test
@@ -46,3 +46,11 @@ Next.js App Router, React, TypeScript, Convex, Geist, Nunito Sans, and Vitest. V
 ## Deployment
 
 Production deployments run on Vercel from `main`. The Vercel production environment supplies the Meleko Convex production deploy key as `CONVEX_DEPLOY_KEY` and the site origin as `NEXT_PUBLIC_APP_URL`. The build deploys the Convex schema and functions alongside the Next.js app.
+
+## Personal verses and accounts
+
+Use **Account** to create or sign in to a passkey account. Choose a username, then follow your device’s passkey prompt. Add a backup passkey from the same screen.
+
+In **Verse Library**, use **Add verse** to look up a reference or range in KJV or WEB, or paste text from your preferred translation. The **My verses** filter shows your collection. Both lookup translations come from [Bible API](https://bible-api.com/), whose [open text repository](https://github.com/seven1m/open-bibles) is available on GitHub. For pasted passages, Meleko displays the translation you select.
+
+Set `AUTH_PASSKEY_ORIGIN` on the Convex deployment to the origin where visitors open the app. For production this is `https://meleko.sprioleau.dev`. For local development the default is `http://localhost:3000`. The passkey belongs to that origin.

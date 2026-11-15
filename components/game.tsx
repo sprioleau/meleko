@@ -3,10 +3,11 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { ArrowLeft, ArrowRight, Check, ChevronRight, Lightbulb, Mic, RotateCcw, Square, Trophy, X, Zap } from "lucide-react";
+import { useCollection } from "@/lib/collection";
 import { Listen } from "@/components/listen";
-import { playCue, recordPractice, usePlayer } from "@/lib/player";
+import { usePlayer, usePlayerActions } from "@/lib/player";
 import { dayKey, eventXp, progressStats, verseProgress } from "@/lib/progress";
-import { findVerse, modeInfo, normalizeWords, scoreRecall, splitWord, verses, wordsOf, type Mode, type Verse, type VerseId } from "@/lib/verses";
+import { modeInfo, normalizeWords, scoreRecall, splitWord, verses, wordsOf, type Mode, type Verse, type VerseId } from "@/lib/verses";
 
 type Round = { verse: Verse; positions: readonly number[] };
 type Tile = { id: number; word: string };
@@ -31,10 +32,10 @@ const instructions: Record<Mode, string> = {
   spoken: "Say the verse from memory or type it below.",
 };
 
-function roundPlan(mode: Mode, verseId: VerseId | undefined, isLesson: boolean): Round[] {
+function roundPlan(mode: Mode, verseId: VerseId | undefined, isLesson: boolean, available: Verse[]): Round[] {
   const selectedVerse = isLesson && mode === "blanks"
     ? undefined
-    : findVerse(verseId) ?? (isLesson ? focusVerse : undefined);
+    : available.find((verse) => verse.id === verseId) ?? (isLesson ? focusVerse : undefined);
   return (selectedVerse ? [selectedVerse] : verses).map((verse) => ({
     verse,
     positions: mode === "ordering" ? wordsOf(verse.text).map((_, index) => index) : verse.blanks,
@@ -152,9 +153,9 @@ function TileRound({ mode, words, positions, tiles, choices, activeSlot, feedbac
         const slot = positions.indexOf(wordIndex);
         if (slot === -1) return <span key={wordIndex}>{token}</span>;
         const choice = choices[slot];
-        const { punctuation } = splitWord(token);
+        const { prefix, punctuation } = splitWord(token);
         const isWrong = Boolean(feedback && choice && choice.word.toLowerCase() !== splitWord(token).word.toLowerCase());
-        return <span key={wordIndex} className="game-slot-token">
+        return <span key={wordIndex} className="game-slot-token">{prefix}
           <button type="button" className="game-slot" data-active={!isLocked && activeSlot === slot}
             data-incorrect={isWrong} data-complete={isLocked} disabled={isLocked}
             aria-label={choice ? `${isWrong ? "Incorrect. " : ""}Remove ${choice.word} from position ${slot + 1}` : `Select missing word ${slot + 1}`}
@@ -188,6 +189,7 @@ function PlayRound({ round, number, mode, hasRecording, onNext, isFinal }: {
   onNext: (result: RoundResult) => void;
   isFinal: boolean;
 }) {
+  const { playCue } = usePlayerActions();
   const { verse, positions } = round;
   const titleRef = useRef<HTMLHeadingElement>(null);
   const isTileMode = mode === "blanks" || mode === "ordering";
@@ -275,7 +277,7 @@ function PlayRound({ round, number, mode, hasRecording, onNext, isFinal }: {
 
   return <section className="game-card game-enter" aria-labelledby="game-round-heading">
     <div className="game-card-heading">
-      <h2 id="game-round-heading" ref={titleRef} tabIndex={-1}>{verse.reference} <span className="mastery-label">KJV</span></h2>
+      <h2 id="game-round-heading" ref={titleRef} tabIndex={-1}>{verse.reference} <span className="mastery-label">{verse.translation}</span></h2>
       {isComplete && <span className="game-round-check"><Check size={17} /> Reviewed</span>}
     </div>
     <form onSubmit={submit}>
@@ -334,12 +336,14 @@ export function Game({ mode, verseId, isLesson, recordings }: {
   isLesson: boolean;
   recordings: VerseId[];
 }) {
-  const [rounds] = useState(() => roundPlan(mode, verseId, isLesson));
+  const collection = useCollection();
+  const rounds = roundPlan(mode, verseId, isLesson, collection.verses);
   const [results, setResults] = useState<RoundResult[]>([]);
   const [earnedXp, setEarnedXp] = useState(0);
   const resultHeading = useRef<HTMLHeadingElement>(null);
   const submittedRounds = useRef(0);
   const player = usePlayer();
+  const { recordPractice } = usePlayerActions();
   const index = results.length;
   const round = rounds[index];
   const hasFinished = index === rounds.length;
@@ -365,6 +369,8 @@ export function Game({ mode, verseId, isLesson, recordings }: {
     setEarnedXp((total) => total + xp);
     setResults([...results, result]);
   }
+
+  if (verseId && !collection.verses.some((verse) => verse.id === verseId)) return <p>{collection.isLoading ? "Loading verse…" : "Verse not found in your collection."}</p>;
 
   return <div className="game-shell">
     <div className="game-topline">

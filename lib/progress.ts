@@ -1,4 +1,4 @@
-import { findVerse, type Mode, type VerseId } from "./verses";
+import { type Mode, type VerseId } from "./verses";
 
 export type PracticeEvent = {
   id: string;
@@ -61,7 +61,7 @@ function weekStart(day: string) {
 }
 
 export function progressStats(events: PracticeEvent[], today: string) {
-  const practice = events.filter((event) => event.mode !== "read" && event.date <= today && findVerse(event.verseId));
+  const practice = events.filter((event) => event.mode !== "read" && event.date <= today);
   const days = new Set(practice.map((event) => event.date));
   const week = weekStart(today);
   const weekDays = Array.from({ length: 7 }, (_, index) => days.has(shiftDay(week, index)));

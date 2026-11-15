@@ -12,6 +12,15 @@ export const practiceEvent = v.object({
 });
 
 export default defineSchema({
+  users: defineTable({}),
+  personalVerses: defineTable({
+    userId: v.id("users"),
+    reference: v.string(),
+    translation: v.string(),
+    text: v.string(),
+    isRemoved: v.optional(v.boolean()),
+  }).index("by_user", ["userId"]),
+  accountPractice: defineTable({ accountId: v.id("users"), event: practiceEvent }).index("by_account_event", ["accountId", "event.id"]),
   practice: defineTable({
     playerKey: v.string(),
     event: practiceEvent,

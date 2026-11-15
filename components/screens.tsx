@@ -3,6 +3,9 @@
 import Link from "next/link";
 import { useState } from "react";
 import { ArrowRight, BookOpen, Check, ChevronRight, ChevronDown, LayoutGrid, List, Lightbulb, Mic, Sparkles, Trophy, Type, Puzzle, ListOrdered, Flame, CalendarDays, Star } from "lucide-react";
+import { RemoveVerse } from "@/components/remove-verse";
+import { AddVerse } from "@/components/add-verse";
+import { useCollection } from "@/lib/collection";
 import { Listen } from "@/components/listen";
 import { usePlayer } from "@/lib/player";
 import { dayKey, progressStats, verseProgress } from "@/lib/progress";
@@ -27,6 +30,7 @@ function ModeIcon({ mode }: { mode: Mode }) {
 
 export function Home({ recordings }: { recordings: VerseId[] }) {
   const { events, today } = usePlayer();
+  const { verses } = useCollection();
   const currentDay = today || dayKey();
   const stats = progressStats(events, currentDay);
   const isRead = events.some((event) => event.date === currentDay && event.verseId === spotlight.id && event.mode === "read");
@@ -54,26 +58,31 @@ export function Home({ recordings }: { recordings: VerseId[] }) {
       <section className="spotlight-card"><div className="card-topline"><span className="eyebrow">VERSE SPOTLIGHT</span><BookOpen size={18} /></div><p className="spotlight-quote">“{spotlight.text}”</p><div className="spotlight-bottom"><strong>{spotlight.reference} · KJV</strong><Listen verse={spotlight} hasRecording={recordings.includes(spotlight.id)} /></div></section>
       <section className="week-card"><div className="card-topline"><div><span className="eyebrow">YOUR RHYTHM</span><h3>This week</h3></div><span className="week-count">{stats.weekDays.filter(Boolean).length} / 7 days</span></div><Week weekDays={stats.weekDays} /><p>Every day you show up matters.</p><Link href="/progress">View your progress <ArrowRight size={15} /></Link></section>
     </aside></div>
-    <section className="due-section"><div className="section-heading"><h2>Ready to review</h2><p>Verses return here when it’s time to practice again.</p></div>{dueVerses.length ? <div className="due-list">{dueVerses.map((verse) => <Link href={`/start?mode=spoken&verse=${verse.id}`} key={verse.id}><span><strong>{verse.reference}</strong><small>{verse.theme} · KJV</small></span><span>Review verse <ArrowRight size={15} /></span></Link>)}</div> : <div className="due-empty">No verses are due for review today.</div>}</section>
+    <section className="due-section"><div className="section-heading"><h2>Ready to review</h2><p>Verses return here when it’s time to practice again.</p></div>{dueVerses.length ? <div className="due-list">{dueVerses.map((verse) => <Link href={`/start?mode=spoken&verse=${verse.id}`} key={verse.id}><span><strong>{verse.reference}</strong><small>{verse.theme} · {verse.translation}</small></span><span>Review verse <ArrowRight size={15} /></span></Link>)}</div> : <div className="due-empty">No verses are due for review today.</div>}</section>
   </div>;
 }
 
 export function Practice() {
   const [verseId, setVerseId] = useState<VerseId>(spotlight.id);
-  return <div className="screens-page"><header className="page-heading"><span className="eyebrow">MAKE IT STICK</span><h1>Practice your way</h1><p>Choose an activity and give your memory a little workout.</p></header><div className="practice-selector"><label htmlFor="practice-verse">Choose a verse</label><div className="practice-select-wrap"><select id="practice-verse" value={verseId} onChange={(event) => setVerseId(event.target.value as VerseId)}>{verses.map((verse) => <option value={verse.id} key={verse.id}>{verse.reference}</option>)}</select><ChevronDown size={18} aria-hidden="true" /></div></div><div className="practice-grid">{modes.map((mode) => <Link href={`/start?mode=${mode}&verse=${verseId}`} className="practice-card" key={mode}><div className="practice-card-top"><ModeIcon mode={mode} /></div><span className="pill">{modeInfo[mode].difficulty}</span><h2>{modeInfo[mode].title}</h2><p>{modeInfo[mode].detail}</p><span className="card-link">Start practicing <ArrowRight size={17} /></span></Link>)}</div><div className="practice-note"><Lightbulb size={20} /><p>Want to choose a different verse? Explore the <Link href="/library">verse library</Link>.</p></div></div>;
+  const { verses } = useCollection();
+  return <div className="screens-page"><header className="page-heading"><span className="eyebrow">MAKE IT STICK</span><h1>Practice your way</h1><p>Choose an activity and give your memory a little workout.</p></header><div className="practice-selector"><label htmlFor="practice-verse">Choose a verse</label><div className="practice-select-wrap"><select id="practice-verse" value={verseId} onChange={(event) => setVerseId(event.target.value as VerseId)}>{verses.map((verse) => <option value={verse.id} key={verse.id}>{verse.reference} · {verse.translation}</option>)}</select><ChevronDown size={18} aria-hidden="true" /></div></div><div className="practice-grid">{modes.map((mode) => <Link href={`/start?mode=${mode}&verse=${verseId}`} className="practice-card" key={mode}><div className="practice-card-top"><ModeIcon mode={mode} /></div><span className="pill">{modeInfo[mode].difficulty}</span><h2>{modeInfo[mode].title}</h2><p>{modeInfo[mode].detail}</p><span className="card-link">Start practicing <ArrowRight size={17} /></span></Link>)}</div><div className="practice-note"><Lightbulb size={20} /><p>Want to choose a different verse? Explore the <Link href="/library">verse library</Link>.</p></div></div>;
 }
 
 export function Library({ recordings }: { recordings: VerseId[] }) {
   const { events, today } = usePlayer();
+  const collection = useCollection();
+  const [tab, setTab] = useState<"all" | "personal">("all");
+  const verses = tab === "personal" ? collection.personalVerses : collection.verses;
   const [view, setView] = useState<"list" | "grid">("list");
-  return <div className="screens-page"><header className="page-heading"><span className="eyebrow">WORDS TO KEEP CLOSE</span><h1>Verse library</h1><p>Explore the verses in your collection, and return to them whenever you need.</p></header><div className="library-toolbar"><span>{verses.length} verses</span><div className="library-view-toggle" role="group" aria-label="Library view"><button type="button" aria-label="List view" aria-pressed={view === "list"} onClick={() => setView("list")}><List size={18} aria-hidden="true" /> List</button><button type="button" aria-label="Grid view" aria-pressed={view === "grid"} onClick={() => setView("grid")}><LayoutGrid size={18} aria-hidden="true" /> Grid</button></div></div><div className={`library-grid library-${view}`}>{verses.map((verse) => {
+  return <div className="screens-page"><header className="page-heading"><span className="eyebrow">WORDS TO KEEP CLOSE</span><h1>Verse library</h1><p>Explore the verses in your collection, and return to them whenever you need.</p></header><AddVerse /><div className="library-tabs" role="group" aria-label="Verse collection"><button type="button" aria-pressed={tab === "all"} onClick={() => setTab("all")}>All verses</button><button type="button" aria-pressed={tab === "personal"} onClick={() => setTab("personal")}>My verses</button></div>{tab === "personal" && (collection.isLoading ? <p>Loading your verses…</p> : !collection.isAuthenticated ? <p><Link href="/account">Sign in</Link> to see your saved verses.</p> : !verses.length ? <p>You haven’t added any verses yet.</p> : null)}<div className="library-toolbar"><span>{verses.length} verses</span><div className="library-view-toggle" role="group" aria-label="Library view"><button type="button" aria-label="List view" aria-pressed={view === "list"} onClick={() => setView("list")}><List size={18} aria-hidden="true" /> List</button><button type="button" aria-label="Grid view" aria-pressed={view === "grid"} onClick={() => setView("grid")}><LayoutGrid size={18} aria-hidden="true" /> Grid</button></div></div><div className={`library-grid library-${view}`}>{verses.map((verse) => {
     const progress = verseProgress(events, verse.id, today || dayKey());
-    return <article className="verse-card" key={verse.id}><div className="verse-card-content"><div className="card-topline"><span className="verse-theme">{verse.theme}</span><span className="mastery-label">{progress.mastery}</span></div><blockquote>“{verse.text}”</blockquote><strong>{verse.reference} · KJV</strong></div><div className="verse-card-actions"><Link className="button button-soft button-small" href={`/learn?verse=${verse.id}`}>Read</Link><Link className="button button-primary button-small" href={`/start?mode=blanks&verse=${verse.id}`}>Practice <ArrowRight size={15} /></Link><Listen verse={verse} hasRecording={recordings.includes(verse.id)} /></div></article>;
+    return <article className="verse-card" key={verse.id}><div className="verse-card-content"><div className="card-topline"><span className="verse-theme">{verse.theme}</span><span className="mastery-label">{progress.mastery}</span></div><blockquote>“{verse.text}”</blockquote><strong>{verse.reference} · {verse.translation}</strong></div><div className="verse-card-actions"><Link className="button button-soft button-small" href={`/learn?verse=${verse.id}`}>Read</Link><Link className="button button-primary button-small" href={`/start?mode=blanks&verse=${verse.id}`}>Practice <ArrowRight size={15} /></Link><Listen verse={verse} hasRecording={recordings.includes(verse.id)} />{verse.id.startsWith("personal:") && <RemoveVerse id={verse.id} reference={verse.reference} />}</div></article>;
   })}</div></div>;
 }
 
 export function Progress() {
   const { events, today } = usePlayer();
+  const { verses } = useCollection();
   const currentDay = today || dayKey();
   const stats = progressStats(events, currentDay);
   const practiced = verses.filter((verse) => verseProgress(events, verse.id, currentDay).mastery !== "New").length;

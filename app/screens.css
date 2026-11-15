@@ -76,3 +76,15 @@
   .library-grid:not(.library-list) .verse-card-actions .button-small { min-height: 38px; padding: 7px 9px; font-size: 12px; }
   .library-grid:not(.library-list) .verse-card-actions .button-primary svg { display: none; }
 }
+
+.add-verse { margin: 0 0 24px; }
+.add-verse-form { display: grid; gap: 12px; max-width: 560px; margin-top: 16px; }
+.add-verse-form label { display: grid; gap: 6px; font-weight: 700; }
+.add-verse-form input, .add-verse-form select, .add-verse-form textarea { width: 100%; padding: 10px 12px; border: 1px solid #ccd4e2; border-radius: 8px; background: white; color: inherit; font: inherit; }
+.add-verse-form .button { justify-self: start; }
+.library-tabs { display: flex; gap: 8px; margin-bottom: 16px; }
+.library-tabs button { padding: 8px 14px; border: 1px solid #ccd4e2; border-radius: 8px; background: white; color: inherit; font: inherit; cursor: pointer; }
+.library-tabs button[aria-pressed="true"] { background: #e5edff; border-color: #6684c7; font-weight: 700; }
+
+.verse-remove { flex-basis: 100%; }
+.verse-remove .button + .button { margin-left: 6px; }

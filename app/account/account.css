@@ -1,0 +1,74 @@
+.account-page {
+  max-width: 740px;
+  padding: 20px 0 24px;
+}
+
+.account-card {
+  display: grid;
+  align-items: start;
+  gap: 12px;
+  padding: clamp(18px, 4vw, 30px);
+  background: white;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+}
+
+.account-card h2,
+.account-card p {
+  margin: 0;
+}
+
+.account-card p {
+  color: var(--muted);
+}
+
+.account-form label {
+  margin-top: 4px;
+  font-size: 14px;
+  font-weight: 850;
+}
+
+.account-form input {
+  width: min(100%, 340px);
+  min-height: 46px;
+  padding: 8px 11px;
+  color: var(--ink);
+  background: white;
+  border: 1px solid #a0aec5;
+  border-radius: 9px;
+}
+
+.account-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.account-card .account-error {
+  color: #a53224;
+}
+
+.account-passkeys {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.account-passkeys li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  background: var(--surface);
+  border-radius: 10px;
+}
+
+.account-passkeys span {
+  display: block;
+  color: var(--muted);
+  font-size: 13px;
+}

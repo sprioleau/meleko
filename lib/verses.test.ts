@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { scoreRecall, splitWord, verses, wordsOf } from "./verses";
+import { makePersonalVerse, scoreRecall, splitWord, verses, wordsOf } from "./verses";
 
 describe("verse recall", () => {
   it("accepts the complete wording when punctuation and case differ", () => {
@@ -35,4 +35,18 @@ it("reports extra words even when every expected word matches", () => {
   expect(result.matched).toEqual([true, true, true, true, true]);
   expect(result.extras).toEqual(["truly"]);
   expect(result.isExact).toBe(false);
+});
+
+
+it("keeps personal passage text and translation while selecting playable blanks", () => {
+  const text = '“The Lord’s mercy,” she said, “endures forever.”';
+  const verse = makePersonalVerse("personal:123", "Psalm 136:1", "ESV", text);
+  expect(verse.text).toBe(text);
+  expect(verse.translation).toBe("ESV");
+  expect(verse.blanks.length).toBeGreaterThan(0);
+  for (const position of verse.blanks) {
+    const token = wordsOf(text)[position];
+    const { prefix, word, punctuation } = splitWord(token);
+    expect(prefix + word + punctuation).toBe(token);
+  }
 });

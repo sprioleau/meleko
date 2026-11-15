@@ -1,6 +1,10 @@
-export const verses = [
+export type Verse = { id: string; reference: string; theme: string; text: string; translation: string; blanks: readonly number[]; distractors: readonly string[] };
+export type VerseId = string;
+
+export const verses: Verse[] = [
   {
     id: "philippians-4-13",
+    translation: "KJV",
     reference: "Philippians 4:13",
     theme: "Strength",
     text: "I can do all things through Christ which strengtheneth me.",
@@ -9,6 +13,7 @@ export const verses = [
   },
   {
     id: "psalm-23-1",
+    translation: "KJV",
     reference: "Psalm 23:1",
     theme: "Trust",
     text: "The LORD is my shepherd; I shall not want.",
@@ -17,6 +22,7 @@ export const verses = [
   },
   {
     id: "psalm-119-11",
+    translation: "KJV",
     reference: "Psalm 119:11",
     theme: "Scripture",
     text: "Thy word have I hid in mine heart, that I might not sin against thee.",
@@ -25,6 +31,7 @@ export const verses = [
   },
   {
     id: "john-11-35",
+    translation: "KJV",
     reference: "John 11:35",
     theme: "Compassion",
     text: "Jesus wept.",
@@ -33,16 +40,14 @@ export const verses = [
   },
   {
     id: "1-timothy-4-15",
+    translation: "KJV",
     reference: "1 Timothy 4:15",
     theme: "Practice",
     text: "Meditate upon these things; give thyself wholly to them; that thy profiting may appear to all.",
     blanks: [0, 5, 6, 11],
     distractors: ["Consider", "freely", "learning"],
   },
-] as const;
-
-export type Verse = (typeof verses)[number];
-export type VerseId = Verse["id"];
+];
 
 export const modes = ["blanks", "ordering", "letters", "spoken"] as const;
 export type Mode = (typeof modes)[number];
@@ -71,8 +76,8 @@ export function normalizeWords(text: string) {
 }
 
 export function splitWord(token: string) {
-  const word = token.replace(/[^a-z]/gi, "");
-  return { word, punctuation: token.slice(word.length) };
+  const match = token.match(/^(.*?)([\p{L}\p{N}]+(?:[’'-][\p{L}\p{N}]+)*)(.*?)$/u);
+  return { prefix: match?.[1] ?? "", word: match?.[2] ?? token, punctuation: match?.[3] ?? "" };
 }
 
 export function scoreRecall(expected: string, answer: string) {
@@ -109,4 +114,12 @@ export function scoreRecall(expected: string, answer: string) {
   const edits = rows[target.length][spoken.length];
   const denominator = Math.max(target.length, spoken.length, 1);
   return { score: Math.max(0, Math.round(100 * (1 - edits / denominator))), isExact: edits === 0, matched, extras };
+}
+
+export function makePersonalVerse(id: string, reference: string, translation: string, text: string): Verse {
+  const words = wordsOf(text);
+  const candidates = words.map((word, index) => ({ index, word: splitWord(word).word })).filter(({ word }) => /[\p{L}\p{N}]/u.test(word));
+  const count = Math.min(6, Math.max(1, Math.ceil(candidates.length / 4)), candidates.length);
+  const blanks = Array.from({ length: count }, (_, index) => candidates[Math.floor((index + 0.5) * candidates.length / count)].index);
+  return { id, reference, translation, text, theme: "Your verse", blanks, distractors: [] };
 }

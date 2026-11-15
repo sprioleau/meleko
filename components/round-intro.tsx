@@ -4,7 +4,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, ArrowRight, BookOpen, CaseSensitive, Clock3, Gamepad2, Mic, PanelsTopLeft, Puzzle } from "lucide-react";
 import { Listen } from "./listen";
-import { recordPractice } from "@/lib/player";
+import { useCollection } from "@/lib/collection";
+import { usePlayerActions } from "@/lib/player";
 import { modeInfo, verses, type Mode, type Verse, type VerseId } from "@/lib/verses";
 
 const icons = { blanks: Puzzle, ordering: PanelsTopLeft, letters: CaseSensitive, spoken: Mic };
@@ -15,7 +16,10 @@ const prompts = {
   spoken: "Recite the verse from memory, then review how the transcript compares. You can type the verse too.",
 };
 
-export function StartScreen({ mode, verse, isLesson, recordings }: { mode: Mode; verse?: Verse; isLesson: boolean; recordings: VerseId[] }) {
+export function StartScreen({ mode, verseId, isLesson, recordings }: { mode: Mode; verseId?: string; isLesson: boolean; recordings: VerseId[] }) {
+  const collection = useCollection();
+  const verse = collection.verses.find((item) => item.id === verseId);
+  if (verseId && !verse) return <p>{collection.isLoading ? "Loading verse…" : "Verse not found in your collection."}</p>;
   const selection = (isLesson && mode === "blanks") || !verse ? verses : [verse];
   const Icon = icons[mode];
   const query = new URLSearchParams({ mode });
@@ -31,7 +35,7 @@ export function StartScreen({ mode, verse, isLesson, recordings }: { mode: Mode;
         <h1>{modeInfo[mode].title}</h1>
         <p className="intro-lead">{prompts[mode]}</p>
         <div className="intro-meta">
-          <span><BookOpen size={16} /> {selection.length} {selection.length === 1 ? "verse" : "verses"} · KJV</span>
+          <span><BookOpen size={16} /> {selection.length} {selection.length === 1 ? "verse" : "verses"} · {selection.length === 1 ? selection[0].translation : "KJV"}</span>
           <span><Clock3 size={16} /> {selection.length === 1 ? "1 min" : "5 min"}</span>
         </div>
         {mode !== "spoken" && <div className="intro-preview">
@@ -45,11 +49,17 @@ export function StartScreen({ mode, verse, isLesson, recordings }: { mode: Mode;
   </div>;
 }
 
-export function LearnScreen({ verse, hasRecording, isLesson }: { verse: Verse; hasRecording: boolean; isLesson: boolean }) {
+export function LearnScreen({ verseId, recordings, isLesson }: { verseId?: string; recordings: VerseId[]; isLesson: boolean }) {
   const router = useRouter();
+  const { recordPractice } = usePlayerActions();
+  const collection = useCollection();
+  const verse = verseId ? collection.verses.find((item) => item.id === verseId) : verses[0];
+  if (!verse) return <p>{collection.isLoading ? "Loading verse…" : "Verse not found in your collection."}</p>;
+  const selectedVerse = verse;
+  const hasRecording = recordings.includes(selectedVerse.id);
 
   function finishReading() {
-    recordPractice(verse.id, "read");
+    recordPractice(selectedVerse.id, "read");
     router.push(isLesson ? "/start?lesson=1" : "/library");
   }
 
@@ -62,7 +72,7 @@ export function LearnScreen({ verse, hasRecording, isLesson }: { verse: Verse; h
         <h1>{verse.reference}</h1>
         <p className="intro-lead">Read the verse slowly, then try saying it back.</p>
         <div className="intro-preview">
-          <div className="verse-reference"><span>King James Version</span><Listen verse={verse} hasRecording={hasRecording} /></div>
+          <div className="verse-reference"><span>{verse.translation}</span><Listen verse={verse} hasRecording={hasRecording} /></div>
           <blockquote>{verse.text}</blockquote>
         </div>
         <button className="button button-primary intro-cta" type="button" onClick={finishReading}>{isLesson ? "Continue to Daily Blanks" : "Mark as read"} <ArrowRight size={19} /></button>

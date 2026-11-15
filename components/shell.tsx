@@ -3,8 +3,8 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { AudioLines, BarChart3, BookOpen, CalendarDays, CircleHelp, Flame, Gamepad2, House, Sparkles, VolumeX } from "lucide-react";
-import { usePlayer, toggleSound } from "@/lib/player";
+import { AudioLines, BarChart3, BookOpen, CalendarDays, CircleHelp, Flame, Gamepad2, House, Sparkles, UserRound, VolumeX } from "lucide-react";
+import { usePlayer, usePlayerActions } from "@/lib/player";
 import { progressStats } from "@/lib/progress";
 import { InstallApp } from "./install";
 
@@ -18,9 +18,10 @@ const nav = [
 export function Shell({ children }: { children: React.ReactNode }) {
   const path = usePathname();
   const { today, events, hasSound } = usePlayer();
+  const { toggleSound } = usePlayerActions();
   const stats = progressStats(events, today || "2000-01-01");
   const currentNav = path === "/learn" ? "/library" : ["/start", "/play"].includes(path) ? "/practice" : path;
-  const currentTitle = nav.find((item) => item.href === currentNav)?.text ?? "About";
+  const currentTitle = nav.find((item) => item.href === currentNav)?.text ?? (path === "/account" ? "Account" : "About");
   const date = today ? new Intl.DateTimeFormat("en-US", { weekday: "long", month: "long", day: "numeric", timeZone: "UTC" }).format(new Date(today + "T12:00:00Z")) : "";
   const isPlaying = path === "/play";
 
@@ -42,6 +43,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
       </Link>
       <nav className="desktop-nav" aria-label="Main navigation">{renderNav()}</nav>
       <div className="sidebar-bottom">
+        <Link href="/account" className={path === "/account" ? "nav-link is-active" : "nav-link"} aria-current={path === "/account" ? "page" : undefined}><UserRound size={19} /><span>Account</span></Link>
         <Link href="/about" className={path === "/about" ? "nav-link is-active" : "nav-link"} aria-current={path === "/about" ? "page" : undefined}><CircleHelp size={19} /><span>About Meleko</span></Link>
       </div>
     </aside>
@@ -60,6 +62,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
           <button type="button" className="icon-button sound-button" aria-label="Game sounds" aria-pressed={hasSound} title={hasSound ? "Mute game sounds" : "Unmute game sounds"} onClick={toggleSound}>
             {hasSound ? <AudioLines size={20} /> : <VolumeX size={19} />}
           </button>
+          <Link className="icon-button mobile-about" href="/account" aria-label="Account"><UserRound size={19} /></Link>
           <Link className="icon-button mobile-about" href="/about" aria-label="About Meleko"><CircleHelp size={20} /></Link>
         </div>
       </header>
