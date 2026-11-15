@@ -1,8 +1,8 @@
-const CACHE_NAME = "meleko-v2";
+const CACHE_NAME = "meleko-v3";
 const OFFLINE_URL = "/offline.html";
 
 self.addEventListener("install", (event) => {
-  event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll([OFFLINE_URL, "/icons/icon-192.png"])));
+  event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll([OFFLINE_URL, "/icons/logo.svg"])));
   self.skipWaiting();
 });
 

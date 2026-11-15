@@ -38,7 +38,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
     <a className="skip-link" href="#main">Skip to content</a>
     <aside className="sidebar">
       <Link className="brand" href="/" aria-label="Meleko home">
-        <Image src="/icons/icon-192.png" width={39} height={39} alt="" unoptimized priority />
+        <Image src="/icons/logo.svg" width={39} height={39} alt="" unoptimized priority />
         <span>Meleko</span>
       </Link>
       <nav className="desktop-nav" aria-label="Main navigation">{renderNav()}</nav>
@@ -51,7 +51,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
       <header className="topbar">
         <div className="topbar-context"><b>{currentTitle}</b>{path === "/" && date && <><i aria-hidden="true" /><span>{date}</span></>}</div>
         <Link className="brand brand-mobile" href="/" aria-label="Meleko home">
-          <Image src="/icons/icon-192.png" width={30} height={30} alt="" unoptimized priority /><span>Meleko</span>
+          <Image src="/icons/logo.svg" width={30} height={30} alt="" unoptimized priority /><span>Meleko</span>
         </Link>
         <div className="topbar-tools">
           <div className="topbar-stats">

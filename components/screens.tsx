@@ -2,18 +2,19 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { ArrowRight, BookOpen, Check, ChevronRight, ChevronDown, LayoutGrid, List, Lightbulb, Mic, Sparkles, Trophy, Type, Puzzle, ListOrdered, Flame, CalendarDays, Star } from "lucide-react";
+import { ArrowRight, BookOpen, Bookmark, Check, ChevronRight, ChevronDown, LayoutGrid, List, Lightbulb, Mic, Sparkles, Trophy, Type, Puzzle, ListOrdered, Flame, CalendarDays, Star } from "lucide-react";
 import { RemoveVerse } from "@/components/remove-verse";
 import { AddVerse } from "@/components/add-verse";
 import { useCollection } from "@/lib/collection";
 import { Listen } from "@/components/listen";
 import { usePlayer } from "@/lib/player";
-import { dayKey, progressStats, verseProgress } from "@/lib/progress";
+import { dailyMode, dayKey, progressStats, verseProgress } from "@/lib/progress";
 import { modeInfo, modes, verses, type Mode, type VerseId } from "@/lib/verses";
 
-const icons = { blanks: Puzzle, ordering: ListOrdered, letters: Type, spoken: Mic };
+const icons = { blanks: Puzzle, ordering: ListOrdered, letters: Type, spoken: Mic, reference: Bookmark };
 const days = ["M", "T", "W", "T", "F", "S", "S"];
-const spotlight = verses[0];
+const starterVerses = verses;
+const spotlight = starterVerses[0];
 
 function Week({ weekDays }: { weekDays: boolean[] }) {
   return <div className="week-days" role="group" aria-label="Practice days this week">
@@ -34,7 +35,9 @@ export function Home({ recordings }: { recordings: VerseId[] }) {
   const currentDay = today || dayKey();
   const stats = progressStats(events, currentDay);
   const isRead = events.some((event) => event.date === currentDay && event.verseId === spotlight.id && event.mode === "read");
-  const blankCount = new Set(events.filter((event) => event.date === currentDay && event.mode === "blanks").map((event) => event.verseId)).size;
+  const challenge = today ? dailyMode(today) : "blanks";
+  const completed = events.filter((event) => event.date === currentDay && event.mode === challenge);
+  const challengeCount = starterVerses.filter((verse) => completed.some((event) => event.verseId === verse.id)).length;
   const isSpoken = events.some((event) => event.date === currentDay && event.verseId === spotlight.id && event.mode === "spoken");
   const dueVerses = verses.filter((verse) => {
     const { nextReview } = verseProgress(events, verse.id, currentDay);
@@ -44,14 +47,14 @@ export function Home({ recordings }: { recordings: VerseId[] }) {
     <section className="lesson-hero">
       <div className="hero-copy"><span className="hero-kicker"><Sparkles size={15} /> ABOUT 5 MINUTES</span>
         <h1>Today’s lesson</h1><p>Make space for Scripture, one verse at a time.</p>
-        <Link className="button button-primary hero-button" href={`/learn?verse=${spotlight.id}&lesson=1`}>Start lesson <ArrowRight size={18} /></Link>
+        <Link className="button button-primary hero-button" href={`/learn?verse=${spotlight.id}&lesson=1&mode=${challenge}`}>Start lesson <ArrowRight size={18} /></Link>
       </div>
       <div className="hero-art" role="img" aria-label="An open book on a blue pedestal" />
     </section>
     <div className="home-grid"><section className="home-activities"><div className="section-heading"><div><h2>Your lesson</h2><p>Three steps to practice today.</p></div></div>
       <div className="activity-list">
-        <Link className="activity-row" href={`/learn?verse=${spotlight.id}&lesson=1`}><span className="mode-icon mode-read"><BookOpen size={21} /></span><span><strong>Read the verse</strong><small>{isRead ? "Completed today" : "Read Philippians 4:13"}</small></span>{isRead ? <Check size={19} /> : <ChevronRight size={19} />}</Link>
-        <Link className="activity-row" href="/start?lesson=1"><ModeIcon mode="blanks" /><span><strong>Daily Blanks</strong><small>{Math.min(blankCount, 5)} of 5 verses completed today</small></span>{blankCount >= 5 ? <Check size={19} /> : <ChevronRight size={19} />}</Link>
+        <Link className="activity-row" href={`/learn?verse=${spotlight.id}&lesson=1&mode=${challenge}`}><span className="mode-icon mode-read"><BookOpen size={21} /></span><span><strong>Read the verse</strong><small>{isRead ? "Completed today" : "Read Philippians 4:13"}</small></span>{isRead ? <Check size={19} /> : <ChevronRight size={19} />}</Link>
+        <Link className="activity-row" href={`/start?lesson=1&mode=${challenge}`}><ModeIcon mode={challenge} /><span><strong>{modeInfo[challenge].title}</strong><small>{challengeCount} of {starterVerses.length} verses completed today</small></span>{challengeCount >= starterVerses.length ? <Check size={19} /> : <ChevronRight size={19} />}</Link>
         <Link className="activity-row" href={`/start?mode=spoken&verse=${spotlight.id}&lesson=1`}><ModeIcon mode="spoken" /><span><strong>Spoken Recall</strong><small>{isSpoken ? "Completed today" : "Say Philippians 4:13 from memory"}</small></span>{isSpoken ? <Check size={19} /> : <ChevronRight size={19} />}</Link>
       </div>
     </section><aside className="home-aside">

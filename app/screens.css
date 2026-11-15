@@ -88,3 +88,5 @@
 
 .verse-remove { flex-basis: 100%; }
 .verse-remove .button + .button { margin-left: 6px; }
+
+.verse-lookup-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }

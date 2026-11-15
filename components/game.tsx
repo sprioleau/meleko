@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { ArrowLeft, ArrowRight, Check, ChevronRight, Lightbulb, Mic, RotateCcw, Square, Trophy, X, Zap } from "lucide-react";
 import { useCollection } from "@/lib/collection";
+import { ReferenceRound } from "./reference-round";
 import { Listen } from "@/components/listen";
 import { usePlayer, usePlayerActions } from "@/lib/player";
 import { dayKey, eventXp, progressStats, verseProgress } from "@/lib/progress";
@@ -29,11 +30,12 @@ const instructions: Record<Mode, string> = {
   blanks: "Choose words from the word bank to complete the verse.",
   ordering: "Choose each word in the order it appears in the verse.",
   letters: "Use the first letters to type the verse from memory.",
+  reference: "Match the passage to its book, chapter, and verse.",
   spoken: "Say the verse from memory or type it below.",
 };
 
 function roundPlan(mode: Mode, verseId: VerseId | undefined, isLesson: boolean, available: Verse[]): Round[] {
-  const selectedVerse = isLesson && mode === "blanks"
+  const selectedVerse = isLesson && mode !== "spoken"
     ? undefined
     : available.find((verse) => verse.id === verseId) ?? (isLesson ? focusVerse : undefined);
   return (selectedVerse ? [selectedVerse] : verses).map((verse) => ({
@@ -346,6 +348,7 @@ export function Game({ mode, verseId, isLesson, recordings }: {
   const { recordPractice } = usePlayerActions();
   const index = results.length;
   const round = rounds[index];
+  const shouldContinueLesson = isLesson && mode !== "spoken";
   const hasFinished = index === rounds.length;
   const requestedVerse = verseId ? `&verse=${verseId}` : "";
   const lessonQuery = isLesson ? "&lesson=1" : "";
@@ -387,8 +390,9 @@ export function Game({ mode, verseId, isLesson, recordings }: {
         <h1>{modeInfo[mode].title}</h1>
         <p>{instructions[mode]}</p>
       </header>
-      <PlayRound key={index} round={round} number={index + 1} mode={mode} isFinal={index === rounds.length - 1}
-        hasRecording={recordings.includes(round.verse.id)} onNext={finishRound} />
+      {mode === "reference" ? <ReferenceRound key={round.verse.id} verse={round.verse} number={index + 1} isFinal={index === rounds.length - 1} onNext={finishRound} />
+      : <PlayRound key={index} round={round} number={index + 1} mode={mode} isFinal={index === rounds.length - 1}
+        hasRecording={recordings.includes(round.verse.id)} onNext={finishRound} />}
     </> : <section className="game-card game-finish game-enter">
       <span className="game-trophy"><Trophy size={32} strokeWidth={1.8} /></span>
       <h1 ref={resultHeading} tabIndex={-1}>Practice complete!</h1>
@@ -398,17 +402,17 @@ export function Game({ mode, verseId, isLesson, recordings }: {
         <div className="game-result"><Zap size={20} /><strong>+{earnedXp} XP</strong><span>Earned today</span></div>
         <div className="game-result"><Check size={20} />
           <strong>{mode === "spoken" ? `${Math.round(results.reduce((sum, result) => sum + result.score, 0) / results.length)}%` : `${results.filter((result) => result.isIndependent).length}/${rounds.length}`}</strong>
-          <span>{mode === "spoken" ? "Word match" : "Without help"}</span>
+          <span>{mode === "spoken" ? "Word match" : mode === "reference" ? "First try" : "Without help"}</span>
         </div>
       </div>
       <div className="game-finish-actions">
-        {isLesson && mode === "blanks" ? <Link href={`/start?mode=spoken&verse=${focusVerse.id}&lesson=1`} className="button button-primary">
+        {shouldContinueLesson ? <Link href={`/start?mode=spoken&verse=${focusVerse.id}&lesson=1`} className="button button-primary">
           Continue to Spoken Recall <ArrowRight size={18} />
         </Link> : <Link href={returnHref} className="button button-primary">
           {isLesson ? "Back to lesson" : "Back to practice"} <ArrowRight size={18} />
         </Link>}
-        <Link href={isLesson && mode === "blanks" ? returnHref : startHref} className="button button-soft">
-          {isLesson && mode === "blanks" ? "Back to lesson" : "Practice again"} <ChevronRight size={17} />
+        <Link href={shouldContinueLesson ? returnHref : startHref} className="button button-soft">
+          {shouldContinueLesson ? "Back to lesson" : "Practice again"} <ChevronRight size={17} />
         </Link>
       </div>
     </section>}

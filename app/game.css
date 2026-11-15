@@ -300,3 +300,18 @@
 .game-listening-orb { display: grid; place-items: center; width: 48px; height: 48px; flex: 0 0 auto; border-radius: 50%; color: #fff !important; background: #3159df; box-shadow: 0 0 0 7px #3159df20; animation: listening-pulse 1.5s ease-in-out infinite; }
 @keyframes listening-pulse { 50% { box-shadow: 0 0 0 14px #3159df0d; transform: scale(1.06); } }
 @media (prefers-reduced-motion: reduce) { .game-listening-orb { animation: none; } }
+
+.reference-passage { display: block; }
+.reference-options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin: 0; padding: 0; border: 0; min-width: 0; }
+.reference-options legend { margin-bottom: 10px; font-weight: 800; color: #344362; }
+.reference-options label { display: flex; align-items: center; gap: 9px; min-height: 48px; padding: 8px 12px; border: 1px solid #d8e2fb; border-radius: 10px; color: #244bbf; font-weight: 750; cursor: pointer; }
+.reference-options label:hover { background: #f2f6ff; }
+.reference-options label[data-selected="true"] { background: #edf2ff; border-color: #5877e8; }
+.reference-options label[data-wrong="true"] { color: #882f27; border-color: #dc867c; background: #fff1ef; }
+.reference-options label:focus-within { outline: 2px solid #315fff; outline-offset: 2px; }
+.reference-options input { margin: 0; accent-color: #244fe8; }
+.reference-option-note { margin-left: auto; font-size: .8rem; }
+
+@media (max-width: 540px) {
+  .reference-options { grid-template-columns: minmax(0, 1fr); }
+}

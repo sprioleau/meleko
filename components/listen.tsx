@@ -63,11 +63,11 @@ export function Listen({ verse, hasRecording }: { verse: Verse; hasRecording: bo
     activeOwner = owner.current;
     setMessage("");
     setIsPlaying(true);
-    if (!hasRecording) {
+    if (!hasRecording && !verse.narrationUrl) {
       speak();
       return;
     }
-    const track = new Audio(`/narration/${verse.id}.mp3`);
+    const track = new Audio(verse.narrationUrl ?? `/narration/${verse.id}.mp3`);
     let isActive = true;
     stopRef.current = () => {
       isActive = false;

@@ -14,6 +14,13 @@ export function dayKey(date = new Date()) {
   return [date.getFullYear(), String(date.getMonth() + 1).padStart(2, "0"), String(date.getDate()).padStart(2, "0")].join("-");
 }
 
+const dailyModes = ["blanks", "ordering", "letters", "reference"] as const;
+
+export function dailyMode(day: string) {
+  const daysSinceEpoch = Math.floor(Date.parse(day + "T00:00:00Z") / 86_400_000);
+  return dailyModes[((daysSinceEpoch % dailyModes.length) + dailyModes.length) % dailyModes.length];
+}
+
 export function shiftDay(day: string, days: number) {
   const date = new Date(day + "T12:00:00Z");
   date.setUTCDate(date.getUTCDate() + days);

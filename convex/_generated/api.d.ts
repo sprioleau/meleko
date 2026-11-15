@@ -10,7 +10,9 @@
 
 import type * as auth from "../auth.js";
 import type * as collection from "../collection.js";
+import type * as narration from "../narration.js";
 import type * as practice from "../practice.js";
+import type * as scripture from "../scripture.js";
 import type * as users from "../users.js";
 
 import type {
@@ -22,7 +24,9 @@ import type {
 declare const fullApi: ApiFromModules<{
   auth: typeof auth;
   collection: typeof collection;
+  narration: typeof narration;
   practice: typeof practice;
+  scripture: typeof scripture;
   users: typeof users;
 }>;
 

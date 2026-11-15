@@ -2,7 +2,7 @@
 
 Learn Scripture through play. Remember it for life.
 
-Meleko is an installable Bible memorization game by **San'Quan Prioleau**. Read or listen to five KJV verses, then practice with Fill in the Blanks, Word Ordering, First-Letter Recall, and Spoken Recall. The name takes inspiration from the Greek *meletaō*, meaning to practice or meditate.
+Meleko is an installable Bible memorization game by **San'Quan Prioleau**. Read or listen to five KJV verses, then practice with Fill in the Blanks, Word Ordering, First-Letter Recall, Reference Match, and Spoken Recall. The name takes inspiration from the Greek *meletaō*, meaning to practice or meditate.
 
 [Play Meleko](https://meleko.sprioleau.dev)
 
@@ -51,6 +51,10 @@ Production deployments run on Vercel from `main`. The Vercel production environm
 
 Use **Account** to create or sign in to a passkey account. Choose a username, then follow your device’s passkey prompt. Add a backup passkey from the same screen.
 
-In **Verse Library**, use **Add verse** to look up a reference or range in KJV or WEB, or paste text from your preferred translation. The **My verses** filter shows your collection. Both lookup translations come from [Bible API](https://bible-api.com/), whose [open text repository](https://github.com/seven1m/open-bibles) is available on GitHub. For pasted passages, Meleko displays the translation you select.
+In **Verse Library**, use **Add verse** to look up a reference or range in KJV or WEB, or paste text from your preferred translation. The **My verses** filter shows your collection. Both lookup translations come from [Bible API](https://bible-api.com/), whose [open text repository](https://github.com/seven1m/open-bibles) is available on GitHub. For pasted passages, Meleko displays the translation you select, including NKJV, NIV, NLT, NASB, and ESV. In a browser with speech recognition, select **Say a reference** and say “John seventeen sixteen” to look it up.
+
+Convex keeps a shared cache of verse text by canonical reference and translation. On a signed-in lookup, Convex queues ElevenLabs narration for eligible passages and serves the shared recording from file storage once it is ready. Set `ELEVENLABS_API_KEY` on Convex for generated narration and optionally set `ELEVENLABS_VOICE_ID`.
+
+The daily lesson rotates its five-round game between Fill in the Blanks, Word Ordering, First-Letter Recall, and Reference Match. Each lesson ends with Spoken Recall.
 
 Set `AUTH_PASSKEY_ORIGIN` on the Convex deployment to the origin where visitors open the app. For production this is `https://meleko.sprioleau.dev`. For local development the default is `http://localhost:3000`. The passkey belongs to that origin.

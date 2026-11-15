@@ -1,4 +1,4 @@
-export type Verse = { id: string; reference: string; theme: string; text: string; translation: string; blanks: readonly number[]; distractors: readonly string[] };
+export type Verse = { id: string; reference: string; theme: string; text: string; translation: string; blanks: readonly number[]; distractors: readonly string[]; narrationUrl?: string | null };
 export type VerseId = string;
 
 export const verses: Verse[] = [
@@ -49,13 +49,14 @@ export const verses: Verse[] = [
   },
 ];
 
-export const modes = ["blanks", "ordering", "letters", "spoken"] as const;
+export const modes = ["blanks", "ordering", "letters", "spoken", "reference"] as const;
 export type Mode = (typeof modes)[number];
 
 export const modeInfo = {
   blanks: { title: "Fill in the Blanks", detail: "Put the missing words back into the verse.", difficulty: "Warm-up" },
   ordering: { title: "Word Ordering", detail: "Put the scrambled words back in order.", difficulty: "Memory builder" },
   letters: { title: "First-Letter Recall", detail: "Rebuild the verse using its first letters.", difficulty: "Memory challenge" },
+  reference: { title: "Reference Match", detail: "Match the passage to its book, chapter, and verse.", difficulty: "Reference practice" },
   spoken: { title: "Spoken Recall", detail: "Say the verse from memory and check what matched.", difficulty: "Full recall" },
 } satisfies Record<Mode, { title: string; detail: string; difficulty: string }>;
 
@@ -116,10 +117,10 @@ export function scoreRecall(expected: string, answer: string) {
   return { score: Math.max(0, Math.round(100 * (1 - edits / denominator))), isExact: edits === 0, matched, extras };
 }
 
-export function makePersonalVerse(id: string, reference: string, translation: string, text: string): Verse {
+export function makePersonalVerse(id: string, reference: string, translation: string, text: string, narrationUrl?: string | null): Verse {
   const words = wordsOf(text);
   const candidates = words.map((word, index) => ({ index, word: splitWord(word).word })).filter(({ word }) => /[\p{L}\p{N}]/u.test(word));
   const count = Math.min(6, Math.max(1, Math.ceil(candidates.length / 4)), candidates.length);
   const blanks = Array.from({ length: count }, (_, index) => candidates[Math.floor((index + 0.5) * candidates.length / count)].index);
-  return { id, reference, translation, text, theme: "Your verse", blanks, distractors: [] };
+  return { id, reference, translation, text, theme: "Your verse", blanks, distractors: [], narrationUrl };
 }
