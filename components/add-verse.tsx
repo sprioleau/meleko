@@ -38,12 +38,14 @@ function ConnectedAddVerse() {
   }
 
   async function lookup(requestedReference: string) {
+    if (isBusy) return;
     setReference(requestedReference);
     clearPreview();
     setIsBusy(true);
     try {
       const result = await find({ reference: requestedReference, translation });
       setReference(result.reference);
+      setTranslation(result.translation);
       setText(result.text);
       setSourceId(result.sourceId);
     } catch (error) {

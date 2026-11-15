@@ -17,6 +17,11 @@ export function VerseVoiceInput({ onReference, isDisabled }: { onReference: (ref
   const [isListening, setIsListening] = useState(false);
   const [message, setMessage] = useState("");
   const active = useRef<Recognition | null>(null);
+  const latestReferenceHandler = useRef(onReference);
+
+  useEffect(() => {
+    latestReferenceHandler.current = onReference;
+  }, [onReference]);
 
   useEffect(() => () => {
     if (active.current) {
@@ -43,7 +48,7 @@ export function VerseVoiceInput({ onReference, isDisabled }: { onReference: (ref
     recognition.onerror = () => setMessage("Couldn’t hear a reference. Try again or type it.");
     recognition.onresult = (event) => {
       const transcript = event.results[0]?.[0]?.transcript;
-      if (transcript) onReference(spokenReference(transcript));
+      if (transcript) latestReferenceHandler.current(spokenReference(transcript));
     };
     try {
       setMessage("");

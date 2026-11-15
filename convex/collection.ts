@@ -30,7 +30,10 @@ export const add = mutation({
     const text = args.text.trim();
     if (!reference || reference.length > 120 || !isTranslation(translation) || !/[a-z]/i.test(text) || text.length > 6000 || text.split(/\s+/).length > 500) throw new Error("Invalid verse.");
     const source = args.sourceId ? await ctx.db.get("scripturePassages", args.sourceId) : null;
-    const sourceId = source?.reference === reference && source.translation === translation && source.text === text ? source._id : undefined;
+    if (args.sourceId && (!source || source.reference !== reference || source.translation !== translation || source.text !== text)) {
+      throw new Error("Look up the passage again before saving.");
+    }
+    const sourceId = source?._id;
     const verses = await ctx.db.query("personalVerses").withIndex("by_user", (index) => index.eq("userId", userId)).collect();
     const existing = verses.find((verse) =>
       verse.reference.toLowerCase() === reference.toLowerCase() && verse.translation === translation && verse.text === text
