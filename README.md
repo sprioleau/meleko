@@ -6,6 +6,14 @@ Meleko is an installable Bible memorization game by **San'Quan Prioleau**. Read 
 
 [Play Meleko](https://meleko.sprioleau.dev)
 
+## Screenshots
+
+| Today’s lesson | Fill in the Blanks on mobile |
+| --- | --- |
+| <img src="docs/screenshots/todays-lesson.png" alt="Desktop dashboard with the daily lesson, verse spotlight, and weekly practice" width="640"> | <img src="docs/screenshots/fill-in-the-blanks-mobile.png" alt="Mobile Fill in the Blanks round for 1 Timothy 4:15" width="260"> |
+
+[See the practice completion screen](docs/screenshots/practice-complete.png)
+
 ## Run locally
 
 Requires Node.js 24 or later.

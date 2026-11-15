@@ -13,9 +13,9 @@ const days = ["M", "T", "W", "T", "F", "S", "S"];
 const spotlight = verses[0];
 
 function Week({ weekDays }: { weekDays: boolean[] }) {
-  return <div className="week-days" aria-label="Practice days this week">
+  return <div className="week-days" role="group" aria-label="Practice days this week">
     {days.map((day, index) => <div className="week-day" key={index}>
-      <span>{day}</span><span className={`day-circle ${weekDays[index] ? "is-done" : ""}`} aria-label={`${["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"][index]}: ${weekDays[index] ? "practiced" : "not practiced"}`}>{weekDays[index] ? <Check size={15} /> : null}</span>
+      <span aria-hidden="true">{day}</span><span role="img" className={`day-circle ${weekDays[index] ? "is-done" : ""}`} aria-label={`${["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"][index]}: ${weekDays[index] ? "practiced" : "not practiced"}`}>{weekDays[index] ? <Check size={15} /> : null}</span>
     </div>)}
   </div>;
 }

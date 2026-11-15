@@ -128,11 +128,11 @@ button svg, a svg { flex-shrink: 0; }
 @media (max-width: 760px) {
   .sidebar, .topbar-context { display: none; }
   .shell-content { margin-left: 0; padding-bottom: calc(66px + env(safe-area-inset-bottom)); }
-  .topbar { min-height: 59px; padding: calc(8px + env(safe-area-inset-top)) 15px 8px; }
+  .topbar { flex-wrap: wrap; min-height: 59px; padding: calc(8px + env(safe-area-inset-top)) 15px 8px; }
   .brand-mobile { display: inline-flex; margin: 0; gap: 7px; font-size: 20px; }
   .brand-mobile img { border-radius: 8px; }
-  .topbar-tools { gap: 6px; }
-  .topbar-stats { gap: 4px; }
+  .topbar-tools { flex-wrap: wrap; max-width: 100%; gap: 6px; }
+  .topbar-stats { flex-wrap: wrap; gap: 4px; }
   .stat-chip { min-height: 33px; padding: 5px 7px; gap: 3px; font-size: 11px; }
   .stat-chip span { display: none; }
   .stat-chip svg { width: 14px; height: 14px; }

@@ -50,7 +50,7 @@ export function LearnScreen({ verse, hasRecording, isLesson }: { verse: Verse; h
 
   function finishReading() {
     recordPractice(verse.id, "read");
-    router.push(isLesson ? "/start?lesson=1" : verse.id === verses[0].id ? "/" : "/library");
+    router.push(isLesson ? "/start?lesson=1" : "/library");
   }
 
   return <div className="intro-wrap">
