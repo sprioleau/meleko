@@ -1,0 +1,3 @@
+{
+  "buildCommand": "if [ -n \"$CONVEX_DEPLOY_KEY\" ]; then npm run build:vercel; else npm run build; fi"
+}
