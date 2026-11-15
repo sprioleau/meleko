@@ -2,7 +2,7 @@
 
 Learn Scripture through play. Remember it for life.
 
-Meleko is an installable Bible memorization game by **Samfon Priolo**. Read or listen to five KJV verses, then practice with Fill in the Blanks, Word Ordering, First-Letter Recall, and Spoken Recall. The name takes inspiration from the Greek *meletaō*, meaning to practice or meditate.
+Meleko is an installable Bible memorization game by **San'Quan Prioleau**. Read or listen to five KJV verses, then practice with Fill in the Blanks, Word Ordering, First-Letter Recall, and Spoken Recall. The name takes inspiration from the Greek *meletaō*, meaning to practice or meditate.
 
 [Play Meleko](https://meleko.sprioleau.dev)
 
@@ -33,7 +33,7 @@ On iOS, use Safari’s Share menu and choose **Add to Home Screen**. In supporti
 
 ## Stack
 
-Next.js App Router, React, TypeScript, Convex, Nunito Sans, and Vitest. Verse text uses the King James Version.
+Next.js App Router, React, TypeScript, Convex, Geist, Nunito Sans, and Vitest. Verse text uses the King James Version.
 
 ## Deployment
 

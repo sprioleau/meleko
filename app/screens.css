@@ -42,3 +42,37 @@
 .due-section { margin-top: 38px; }.due-list, .due-empty { margin-top: 16px; border: 1px solid #e8ecf4; border-radius: 16px; background: white; }.due-empty { padding: 22px; color: #596981; font-size: 14px; }.due-list a { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 16px 20px; color: #3159c8; text-decoration: none; font-size: 13px; font-weight: 800; }.due-list a + a { border-top: 1px solid #edf0f5; }.due-list a span:first-child { display: grid; gap: 4px; color: #233254; }.due-list small { color: #63718a; font-weight: 600; }.due-list a span:last-child { display: flex; align-items: center; gap: 6px; }
 .activity-row small, .week-day, .mode-number { color: #65738a; }.mastery-label { color: #58677e; }.week-count { color: #5e6d85; }
 @media (max-width: 760px) { .hero-art { mask-image: linear-gradient(to bottom, transparent, #000 22%); } }
+
+.practice-selector { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; margin: 0 0 24px; }
+.practice-selector label { color: #273553; font-size: 14px; font-weight: 800; }
+.practice-selector select { width: min(100%, 320px); padding: 12px 42px 12px 16px; border: 1px solid #d5def1; border-radius: 12px; color: #273553; background: #fff; font: inherit; font-weight: 700; cursor: pointer; }
+.practice-selector select:focus-visible { outline: 3px solid #91abfa; outline-offset: 2px; }
+.screens-page h1, .screens-page h2, .screens-page h3 { font-family: var(--heading-font, sans-serif); font-weight: 700; }
+.practice-select-wrap { position: relative; width: min(100%, 320px); }
+.practice-selector select { appearance: none; width: 100%; min-height: 48px; padding-right: 48px; border-color: #cfd8e8; border-radius: 12px; font-weight: 600; }
+.practice-select-wrap > svg { position: absolute; right: 16px; top: 50%; transform: translateY(-50%); color: #65738a; pointer-events: none; }
+.library-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; color: #65738a; font-size: 13px; font-weight: 700; }
+.library-view-toggle { display: inline-flex; padding: 4px; gap: 2px; background: #f1f4f9; border-radius: 12px; }
+.library-view-toggle button { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 40px; padding: 0 12px; border: 0; border-radius: 9px; background: transparent; color: #596981; font: inherit; cursor: pointer; }
+.library-view-toggle button[aria-pressed="true"] { background: white; color: #244fe8; box-shadow: 0 1px 4px #20365c1a; }
+.library-view-toggle button:focus-visible { outline: 3px solid #91abfa; outline-offset: 2px; }
+.library-list { grid-template-columns: 1fr; gap: 12px; }
+.library-list .verse-card { flex-direction: row; align-items: center; gap: 24px; min-height: 0; padding: 20px 24px; }
+.library-list .verse-card-content { flex: 1; min-width: 0; }
+.library-list .card-topline { justify-content: flex-start; }
+.library-list .verse-card blockquote { margin: 12px 0 8px; font-size: 16px; }
+.library-list .verse-card-actions { flex: none; margin: 0; padding: 0; }
+@media (max-width: 760px) { .library-list .verse-card { align-items: flex-start; flex-direction: column; gap: 16px; }.library-list .verse-card-actions { flex-wrap: wrap; } }
+@media (max-width: 350px) { .stats-grid { grid-template-columns: 1fr; } }
+
+@media (min-width: 361px) and (max-width: 520px) {
+  .library-grid.library-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .library-grid.library-list { grid-template-columns: 1fr; }
+  .library-grid:not(.library-list) .verse-card { min-width: 0; padding: 14px; }
+  .library-grid:not(.library-list) .card-topline { align-items: flex-start; flex-wrap: wrap; gap: 5px; }
+  .library-grid:not(.library-list) .verse-theme, .library-grid:not(.library-list) .mastery-label { padding: 4px 7px; font-size: 10px; }
+  .library-grid:not(.library-list) .verse-card blockquote { margin: 14px 0 10px; font-size: 15px; line-height: 1.45; overflow-wrap: anywhere; }
+  .library-grid:not(.library-list) .verse-card-actions { flex-wrap: wrap; gap: 6px; padding-top: 14px; }
+  .library-grid:not(.library-list) .verse-card-actions .button-small { min-height: 38px; padding: 7px 9px; font-size: 12px; }
+  .library-grid:not(.library-list) .verse-card-actions .button-primary svg { display: none; }
+}

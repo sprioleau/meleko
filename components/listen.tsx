@@ -4,25 +4,45 @@ import { useEffect, useRef, useState } from "react";
 import { Volume2, Square } from "lucide-react";
 import type { Verse } from "@/lib/verses";
 
+let stopActivePlayback: (() => void) | undefined;
+let activeOwner: object | undefined;
+
 export function Listen({ verse, hasRecording }: { verse: Verse; hasRecording: boolean }) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [message, setMessage] = useState("");
   const stopRef = useRef<(() => void) | null>(null);
+  const owner = useRef({});
 
-  useEffect(() => () => stopRef.current?.(), []);
+  useEffect(() => () => {
+    stopRef.current?.();
+    if (activeOwner === owner.current) {
+      stopActivePlayback = undefined;
+      activeOwner = undefined;
+    }
+  }, []);
+
+  function stopPlayback() {
+    stopRef.current?.();
+    stopRef.current = null;
+    if (activeOwner === owner.current) {
+      stopActivePlayback = undefined;
+      activeOwner = undefined;
+    }
+    setIsPlaying(false);
+  }
 
   function speak() {
     if (!("speechSynthesis" in window)) {
-      setIsPlaying(false);
+      stopPlayback();
       setMessage("Audio is unavailable on this device.");
       return;
     }
     const speech = new SpeechSynthesisUtterance(verse.text);
     speech.lang = "en-US";
     speech.rate = 0.88;
-    speech.onend = () => setIsPlaying(false);
+    speech.onend = stopPlayback;
     speech.onerror = () => {
-      setIsPlaying(false);
+      stopPlayback();
       setMessage("Audio could not play. Try again.");
     };
     stopRef.current = () => {
@@ -35,10 +55,12 @@ export function Listen({ verse, hasRecording }: { verse: Verse; hasRecording: bo
 
   function togglePlayback() {
     if (isPlaying) {
-      stopRef.current?.();
-      setIsPlaying(false);
+      stopPlayback();
       return;
     }
+    stopActivePlayback?.();
+    stopActivePlayback = stopPlayback;
+    activeOwner = owner.current;
     setMessage("");
     setIsPlaying(true);
     if (!hasRecording) {
@@ -49,9 +71,10 @@ export function Listen({ verse, hasRecording }: { verse: Verse; hasRecording: bo
     let isActive = true;
     stopRef.current = () => {
       isActive = false;
+      track.onended = null;
       track.pause();
     };
-    track.onended = () => setIsPlaying(false);
+    track.onended = stopPlayback;
     void track.play().catch(() => {
       if (isActive) speak();
     });

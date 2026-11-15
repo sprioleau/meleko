@@ -10,6 +10,7 @@
   --line: #e3e9f3;
   --surface: #f8faff;
   --nav-width: 232px;
+  --heading-font: "Geist Variable", "Nunito Sans Variable", system-ui, sans-serif;
   color: var(--ink);
   background: var(--surface);
   font-family: "Nunito Sans Variable", "Nunito Sans", system-ui, sans-serif;
@@ -40,7 +41,7 @@ button svg, a svg { flex-shrink: 0; }
   background: white;
   border-right: 1px solid var(--line);
 }
-.brand { display: inline-flex; align-items: center; gap: 10px; width: fit-content; margin: 0 9px; text-decoration: none; color: #111f3b; font-size: 27px; font-weight: 900; letter-spacing: -.065em; }
+.brand { display: inline-flex; align-items: center; gap: 10px; width: fit-content; margin: 0 9px; text-decoration: none; color: #111f3b; font-family: var(--heading-font); font-size: 24px; font-weight: 720; letter-spacing: -.046em; }
 .brand img { flex-shrink: 0; border-radius: 11px; }
 .desktop-nav { display: grid; gap: 6px; margin-top: 49px; }
 .sidebar-bottom { display: grid; gap: 6px; margin-top: auto; }
@@ -113,7 +114,7 @@ button svg, a svg { flex-shrink: 0; }
 .intro-emblem { display: grid; place-items: center; width: 80px; height: 80px; border-radius: 23px; color: white; background: var(--blue); box-shadow: 0 10px 22px #244fe840, inset 0 -4px 0 #1529663b; transform: rotate(-7deg); }
 .intro-body { padding: 32px 38px 38px; }
 .intro-body .eyebrow { margin: 0 0 9px; }
-.intro-body h1 { margin: 0; line-height: 1.12; letter-spacing: -.042em; font-size: clamp(32px, 5vw, 44px); }
+.intro-body h1 { margin: 0; line-height: 1.15; font-family: var(--heading-font); font-weight: 660; letter-spacing: -.035em; font-size: clamp(29px, 4.2vw, 38px); }
 .intro-lead { margin: 10px 0 0; color: var(--muted); line-height: 1.6; }
 .intro-meta { display: flex; flex-wrap: wrap; gap: 8px 17px; margin: 18px 0 0; color: var(--muted); font-size: 13px; font-weight: 750; }
 .intro-meta span { display: inline-flex; align-items: center; gap: 7px; }
@@ -128,7 +129,7 @@ button svg, a svg { flex-shrink: 0; }
   .sidebar, .topbar-context { display: none; }
   .shell-content { margin-left: 0; padding-bottom: calc(66px + env(safe-area-inset-bottom)); }
   .topbar { min-height: 59px; padding: calc(8px + env(safe-area-inset-top)) 15px 8px; }
-  .brand-mobile { display: inline-flex; margin: 0; gap: 7px; font-size: 22px; }
+  .brand-mobile { display: inline-flex; margin: 0; gap: 7px; font-size: 20px; }
   .brand-mobile img { border-radius: 8px; }
   .topbar-tools { gap: 6px; }
   .topbar-stats { gap: 4px; }
@@ -148,8 +149,9 @@ button svg, a svg { flex-shrink: 0; }
 }
 
 @media (max-width: 360px) {
-  .topbar { padding-inline: 10px; }
-  .topbar-tools { gap: 4px; }
+  .topbar { flex-wrap: wrap; gap: 4px; padding-inline: 10px; }
+  .topbar-tools { flex: 1 1 100%; justify-content: flex-end; flex-wrap: wrap; gap: 4px; }
+  .topbar-stats { flex-wrap: wrap; }
   .brand-mobile span { font-size: 19px; }
   .stat-chip { padding-inline: 5px; }
 }

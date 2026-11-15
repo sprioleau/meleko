@@ -17,6 +17,7 @@ interface Recognition {
   onresult: ((event: { results: ArrayLike<ArrayLike<{ transcript: string }>> }) => void) | null;
   onerror: (() => void) | null;
   onend: (() => void) | null;
+  onspeechend: (() => void) | null;
   start(): void;
   stop(): void;
   abort(): void;
@@ -50,13 +51,15 @@ function makeTiles(options: string[], seed: number) {
   return tiles;
 }
 
-function RecallInput({ answer, onAnswer, isLocked, mode, isListening, onListening }: {
+function RecallInput({ answer, onAnswer, isLocked, mode, isListening, onListening, isProcessing, onProcessing }: {
   answer: string;
   onAnswer: (answer: string) => void;
   isLocked: boolean;
   mode: Mode;
   isListening: boolean;
   onListening: (value: boolean) => void;
+  isProcessing: boolean;
+  onProcessing: (value: boolean) => void;
 }) {
   const [message, setMessage] = useState("");
   const recognitionRef = useRef<Recognition | null>(null);
@@ -65,6 +68,7 @@ function RecallInput({ answer, onAnswer, isLocked, mode, isListening, onListenin
     const recognition = recognitionRef.current;
     if (!recognition) return;
     recognition.onend = null;
+    recognition.onspeechend = null;
     recognition.onresult = null;
     recognition.onerror = null;
     recognition.abort();
@@ -72,6 +76,7 @@ function RecallInput({ answer, onAnswer, isLocked, mode, isListening, onListenin
 
   function toggleRecognition() {
     if (isListening) {
+      onProcessing(true);
       recognitionRef.current?.stop();
       return;
     }
@@ -89,13 +94,19 @@ function RecallInput({ answer, onAnswer, isLocked, mode, isListening, onListenin
       const recognition = new SpeechRecognition();
       recognitionRef.current = recognition;
       recognition.lang = "en-US";
-      recognition.onresult = (event) => onAnswer(event.results[0][0].transcript);
+      recognition.onresult = (event) => {
+        onAnswer(event.results[0][0].transcript);
+        onProcessing(false);
+      };
+      recognition.onspeechend = () => onProcessing(true);
       recognition.onend = () => {
         recognitionRef.current = null;
         onListening(false);
+        onProcessing(false);
       };
       recognition.onerror = () => {
         onListening(false);
+        onProcessing(false);
         setMessage("Speech recognition could not capture your verse. Try again or type it below.");
       };
       recognition.start();
@@ -112,7 +123,7 @@ function RecallInput({ answer, onAnswer, isLocked, mode, isListening, onListenin
         {isListening ? <Square size={17} /> : <Mic size={17} />}
         {isListening ? "Stop recording" : "Use microphone"}
       </button>
-      {isListening && <span role="status">Listening…</span>}
+      {isListening && <div className="game-listening" role="status"><span className="game-listening-orb" aria-hidden="true"><Mic size={22} /></span><span>{isProcessing ? "Processing your recording…" : "Listening… speak your verse"}</span></div>}
     </div>}
     {message && <p className="game-mic-message" role="status">{message}</p>}
     <label htmlFor="game-answer">Your verse</label>
@@ -122,7 +133,7 @@ function RecallInput({ answer, onAnswer, isLocked, mode, isListening, onListenin
   </div>;
 }
 
-function TileRound({ mode, words, positions, tiles, choices, activeSlot, feedback, onSlot, onTile }: {
+function TileRound({ mode, words, positions, tiles, choices, activeSlot, feedback, onSlot, onTile, onShuffle }: {
   mode: Mode;
   words: string[];
   positions: readonly number[];
@@ -132,6 +143,7 @@ function TileRound({ mode, words, positions, tiles, choices, activeSlot, feedbac
   feedback: ReturnType<typeof scoreRecall> | null;
   onSlot: (slot: number) => void;
   onTile: (tile: Tile) => void;
+  onShuffle: () => void;
 }) {
   const isLocked = feedback?.isExact ?? false;
   return <>
@@ -147,13 +159,14 @@ function TileRound({ mode, words, positions, tiles, choices, activeSlot, feedbac
             data-incorrect={isWrong} data-complete={isLocked} disabled={isLocked}
             aria-label={choice ? `${isWrong ? "Incorrect. " : ""}Remove ${choice.word} from position ${slot + 1}` : `Select missing word ${slot + 1}`}
             aria-pressed={!isLocked && activeSlot === slot} onClick={() => onSlot(slot)}>
-            {choice?.word ?? <span aria-hidden="true">{mode === "ordering" ? slot + 1 : ""}</span>}
+            {mode === "blanks" && tiles.map((tile) => <span className="game-slot-measure" aria-hidden="true" key={tile.id}>{tile.word}</span>)}
+            <span className="game-slot-content">{choice?.word ?? (mode === "ordering" ? slot + 1 : "")}</span>
           </button>{punctuation}
         </span>;
       })}
     </div>
     {!isLocked && <div className="game-word-bank">
-      <h3>Word bank</h3>
+      <div className="game-bank-heading"><h3>Word bank</h3>{mode === "ordering" && <button type="button" className="button button-soft button-small" onClick={onShuffle}><RotateCcw size={15} /> Shuffle words</button>}</div>
       <div className="game-tiles">
         {tiles.map((tile) => {
           const isUsed = choices.some((choice) => choice?.id === tile.id);
@@ -179,7 +192,7 @@ function PlayRound({ round, number, mode, hasRecording, onNext, isFinal }: {
   const titleRef = useRef<HTMLHeadingElement>(null);
   const isTileMode = mode === "blanks" || mode === "ordering";
   const [words] = useState(() => wordsOf(verse.text));
-  const [tiles] = useState(() => makeTiles([
+  const [tiles, setTiles] = useState(() => makeTiles([
     ...positions.map((position) => splitWord(words[position]).word),
     ...(mode === "blanks" ? verse.distractors : []),
   ], number + words.length));
@@ -187,12 +200,13 @@ function PlayRound({ round, number, mode, hasRecording, onNext, isFinal }: {
   const [selectedSlot, setSelectedSlot] = useState<number | null>(null);
   const [answer, setAnswer] = useState("");
   const [isListening, setIsListening] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
   const [feedback, setFeedback] = useState<ReturnType<typeof scoreRecall> | null>(null);
   const [hasHint, setHasHint] = useState(false);
   const [hasMiss, setHasMiss] = useState(false);
   const activeSlot = selectedSlot ?? choices.indexOf(null);
   const isComplete = Boolean(feedback && (feedback.isExact || mode === "spoken"));
-  const canCheck = isTileMode ? choices.every(Boolean) : !isListening && normalizeWords(answer).length > 0;
+  const canCheck = isTileMode ? choices.every(Boolean) : !isListening && !isProcessing && normalizeWords(answer).length > 0;
 
   useEffect(() => {
     if (number > 1) titleRef.current?.focus();
@@ -266,12 +280,19 @@ function PlayRound({ round, number, mode, hasRecording, onNext, isFinal }: {
     </div>
     <form onSubmit={submit}>
       {isTileMode ? <TileRound mode={mode} words={words} positions={positions} tiles={tiles} activeSlot={activeSlot}
-        choices={choices} feedback={feedback} onSlot={chooseSlot} onTile={chooseTile} /> : <>
+        choices={choices} feedback={feedback} onSlot={chooseSlot} onTile={chooseTile} onShuffle={() => setTiles((previous) => {
+          const shuffled = [...previous];
+          for (let index = shuffled.length - 1; index > 0; index--) {
+            const swap = Math.floor(Math.random() * (index + 1));
+            [shuffled[index], shuffled[swap]] = [shuffled[swap], shuffled[index]];
+          }
+          return shuffled;
+        })} /> : <>
         {mode === "letters" && <p className="game-verse game-letter-cues" aria-label="First letters of each word">
           {words.map((token, index) => <span key={index}>{token[0].toUpperCase()}{splitWord(token).punctuation}</span>)}
         </p>}
         <RecallInput mode={mode} answer={answer} onAnswer={updateAnswer} isLocked={isComplete}
-          isListening={isListening} onListening={setIsListening} />
+          isListening={isListening} onListening={setIsListening} isProcessing={isProcessing} onProcessing={setIsProcessing} />
       </>}
       {hasHint && !isTileMode && !isComplete && <p className="game-hint-verse">
         <Lightbulb size={18} aria-hidden="true" /> {verse.text}
