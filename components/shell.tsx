@@ -2,11 +2,14 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
-import { AudioLines, BarChart3, BookOpen, CalendarDays, CircleHelp, Flame, Gamepad2, House, Sparkles, UserRound, VolumeX } from "lucide-react";
+import { AudioLines, BarChart3, BookOpen, CalendarDays, CircleHelp, Flame, Gamepad2, House, PanelLeftClose, PanelLeftOpen, Sparkles, UserRound, VolumeX } from "lucide-react";
 import { usePlayer, usePlayerActions } from "@/lib/player";
 import { progressStats } from "@/lib/progress";
 import { InstallApp } from "./install";
+
+const sidebarPreference = "meleko-sidebar-collapsed";
 
 const nav = [
   { href: "/", text: "Today", icon: House },
@@ -24,32 +27,63 @@ export function Shell({ children }: { children: React.ReactNode }) {
   const currentTitle = nav.find((item) => item.href === currentNav)?.text ?? (path === "/account" ? "Account" : "About");
   const date = today ? new Intl.DateTimeFormat("en-US", { weekday: "long", month: "long", day: "numeric", timeZone: "UTC" }).format(new Date(today + "T12:00:00Z")) : "";
   const isPlaying = path === "/play";
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
-  function renderNav(mobile = false) {
+  useEffect(() => {
+    try {
+      setIsSidebarCollapsed(localStorage.getItem(sidebarPreference) === "true");
+    } catch {
+      /*
+        The sidebar still works when the browser blocks local storage.
+      */
+    }
+  }, []);
+
+  function toggleSidebar() {
+    const shouldCollapse = !isSidebarCollapsed;
+    setIsSidebarCollapsed(shouldCollapse);
+    try {
+      localStorage.setItem(sidebarPreference, String(shouldCollapse));
+    } catch {
+      /*
+        Keep the preference for the current visit.
+      */
+    }
+  }
+
+  function renderNav(isMobile = false) {
     return nav.map(({ href, text, mobileText, icon: Icon }) => {
       const isActive = href === currentNav;
-      return <Link href={href} className={isActive ? "nav-link is-active" : "nav-link"} key={href} aria-current={isActive ? "page" : undefined}>
-        <Icon size={19} strokeWidth={isActive ? 2.35 : 1.9} /><span>{mobile ? mobileText ?? text : text}</span>
+      const label = isMobile ? mobileText ?? text : text;
+      return <Link aria-label={label} title={!isMobile && isSidebarCollapsed ? label : undefined} href={href} className={isActive ? "nav-link is-active" : "nav-link"} key={href} aria-current={isActive ? "page" : undefined}>
+        <Icon size={19} strokeWidth={isActive ? 2.35 : 1.9} /><span>{label}</span>
       </Link>;
     });
   }
 
-  return <div className={isPlaying ? "shell is-playing" : "shell"}>
+  return <div className="shell" data-sidebar-collapsed={isSidebarCollapsed} data-playing={isPlaying}>
     <a className="skip-link" href="#main">Skip to content</a>
-    <aside className="sidebar">
+    <aside className="sidebar" id="desktop-sidebar">
       <Link className="brand" href="/" aria-label="Meleko home">
         <Image src="/icons/logo.svg" width={39} height={39} alt="" unoptimized priority />
         <span>Meleko</span>
       </Link>
       <nav className="desktop-nav" aria-label="Main navigation">{renderNav()}</nav>
       <div className="sidebar-bottom">
-        <Link href="/account" className={path === "/account" ? "nav-link is-active" : "nav-link"} aria-current={path === "/account" ? "page" : undefined}><UserRound size={19} /><span>Account</span></Link>
-        <Link href="/about" className={path === "/about" ? "nav-link is-active" : "nav-link"} aria-current={path === "/about" ? "page" : undefined}><CircleHelp size={19} /><span>About Meleko</span></Link>
+        <Link href="/account" aria-label="Account" title={isSidebarCollapsed ? "Account" : undefined} className={path === "/account" ? "nav-link is-active" : "nav-link"} aria-current={path === "/account" ? "page" : undefined}><UserRound size={19} /><span>Account</span></Link>
+        <Link href="/about" aria-label="About Meleko" title={isSidebarCollapsed ? "About Meleko" : undefined} className={path === "/about" ? "nav-link is-active" : "nav-link"} aria-current={path === "/about" ? "page" : undefined}><CircleHelp size={19} /><span>About Meleko</span></Link>
       </div>
     </aside>
     <div className="shell-content">
       <header className="topbar">
-        <div className="topbar-context"><b>{currentTitle}</b>{path === "/" && date && <><i aria-hidden="true" /><span>{date}</span></>}</div>
+        <div className="topbar-context">
+          <button type="button" className="icon-button sidebar-toggle" onClick={toggleSidebar}
+            aria-controls="desktop-sidebar" aria-expanded={!isSidebarCollapsed}
+            aria-label={isSidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+            title={isSidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}>
+            {isSidebarCollapsed ? <PanelLeftOpen size={18} /> : <PanelLeftClose size={18} />}
+          </button>
+          <b>{currentTitle}</b>{path === "/" && date && <><i aria-hidden="true" /><span>{date}</span></>}</div>
         <Link className="brand brand-mobile" href="/" aria-label="Meleko home">
           <Image src="/icons/logo.svg" width={30} height={30} alt="" unoptimized priority /><span>Meleko</span>
         </Link>

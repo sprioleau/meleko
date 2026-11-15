@@ -141,8 +141,8 @@ button svg, a svg { flex-shrink: 0; }
   .main-content { padding: 0 16px; }
   .mobile-nav { display: grid; grid-template-columns: repeat(4, 1fr); position: fixed; z-index: 9; inset: auto 0 0; padding: 6px 9px calc(6px + env(safe-area-inset-bottom)); background: white; border-top: 1px solid var(--line); }
   .mobile-nav .nav-link { justify-self: center; width: min(100%, 85px); min-height: 48px; justify-content: center; flex-direction: column; gap: 2px; padding: 6px 5px; font-size: 11px; }
-  .is-playing .mobile-nav { display: none; }
-  .is-playing .shell-content { padding-bottom: env(safe-area-inset-bottom); }
+  .shell[data-playing="true"] .mobile-nav { display: none; }
+  .shell[data-playing="true"] .shell-content { padding-bottom: env(safe-area-inset-bottom); }
   .intro-wrap { margin-top: 19px; }
   .intro-body { padding: 25px 20px 22px; }
   .intro-banner { min-height: 126px; }
@@ -160,7 +160,7 @@ button svg, a svg { flex-shrink: 0; }
   *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
 }
 
-.install-control { position: fixed; z-index: 11; bottom: 72px; left: 17px; width: calc(var(--nav-width) - 34px); }
+.install-control { position: fixed; z-index: 11; bottom: 126px; left: 17px; width: calc(var(--nav-width) - 34px); }
 .install-control .install-button { justify-content: flex-start; width: 100%; color: #54637e; background: white; padding-inline: 13px; }
 .install-control .install-button:hover { color: var(--blue-deep); background: var(--blue-soft); }
 .install-control p { margin: 3px 0 0; padding: 8px; border: 1px solid var(--line); border-radius: 8px; background: white; color: var(--muted); font-size: 13px; }
@@ -168,4 +168,17 @@ button svg, a svg { flex-shrink: 0; }
   .install-control { display: none; }
   .install-control.is-about { display: block; position: static; width: fit-content; margin: -66px auto 28px; text-align: center; }
   .install-control .install-button { border-color: var(--line); }
+}
+
+@media (min-width: 761px) {
+  .shell[data-sidebar-collapsed="true"] { --nav-width: 72px; }
+  .shell[data-sidebar-collapsed="true"] .sidebar { padding-inline: 10px; }
+  .shell[data-sidebar-collapsed="true"] .sidebar .brand { align-self: center; margin-inline: 0; }
+  .shell[data-sidebar-collapsed="true"] .sidebar .brand span,
+  .shell[data-sidebar-collapsed="true"] .sidebar .nav-link span,
+  .shell[data-sidebar-collapsed="true"] .install-button span { display: none; }
+  .shell[data-sidebar-collapsed="true"] .sidebar .nav-link,
+  .shell[data-sidebar-collapsed="true"] .install-button { justify-content: center; padding-inline: 0; }
+  .shell[data-sidebar-collapsed="true"] .install-control { left: 10px; width: 52px; }
+  .shell[data-sidebar-collapsed="true"] .install-control p { position: absolute; bottom: 0; left: 60px; width: 220px; }
 }

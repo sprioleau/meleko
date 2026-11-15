@@ -52,8 +52,8 @@ export function InstallApp() {
 
   return (
     <div>
-      <button type="button" className="button install-button" onClick={handleInstall} aria-expanded={isIos ? shouldShowInstructions : undefined}>
-        <Download size={18} aria-hidden="true" /> Install app
+      <button type="button" className="button install-button" aria-label="Install app" title="Install app" onClick={handleInstall} aria-expanded={isIos ? shouldShowInstructions : undefined}>
+        <Download size={18} aria-hidden="true" /> <span>Install app</span>
       </button>
       {shouldShowInstructions && isIos && (
         <p>Tap the Share button in Safari, then choose Add to Home Screen.</p>
